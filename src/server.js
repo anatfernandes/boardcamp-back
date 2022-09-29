@@ -10,8 +10,6 @@ server.use(express.json());
 server.use(cors());
 
 server.get("/status", (req, res) => {
-	console.log("it is alive!!!");
-
 	res.sendStatus(200);
 });
 
