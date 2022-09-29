@@ -6,20 +6,39 @@ async function createCategorie(req, res) {
 
 	if (!name) return res.sendStatus(STATUS_CODE.BAD_REQUEST);
 
-	const hasName = await connection.query(
-		"SELECT name FROM categories WHERE name = $1;",
-		[name]
-	);
+	try {
+		const hasName = await connection.query(
+			"SELECT name FROM categories WHERE name = $1;",
+			[name]
+		);
 
-	if (hasName.rows.length !== 0) return res.sendStatus(STATUS_CODE.CONFLICT);
+		if (hasName.rows.length !== 0) return res.sendStatus(STATUS_CODE.CONFLICT);
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
 
-	await connection.query("INSERT INTO categories (name) VALUES ($1);", [name]);
+	try {
+		await connection.query("INSERT INTO categories (name) VALUES ($1);", [
+			name,
+		]);
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
 
 	res.sendStatus(STATUS_CODE.CREATED);
 }
 
 async function getCategorie(req, res) {
-	const categories = await connection.query("SELECT * FROM categories;");
+	let categories;
+
+	try {
+		categories = await connection.query("SELECT * FROM categories;");
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
 
 	res.status(STATUS_CODE.OK).send(categories.rows);
 }
