@@ -18,4 +18,10 @@ async function createCategorie(req, res) {
 	res.sendStatus(STATUS_CODE.CREATED);
 }
 
-export { createCategorie };
+async function getCategorie(req, res) {
+	const categories = await connection.query("SELECT * FROM categories;");
+
+	res.status(STATUS_CODE.OK).send(categories.rows);
+}
+
+export { createCategorie, getCategorie };
