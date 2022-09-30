@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import categoriesRouter from "./routers/categories.router.js";
 import gamesRouter from "./routers/games.router.js";
+import customersRouter from "./routers/customers.router.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ server.use(cors());
 
 server.use(categoriesRouter);
 server.use(gamesRouter);
+server.use(customersRouter);
 
 server.get("/status", (req, res) => {
 	res.sendStatus(200);
