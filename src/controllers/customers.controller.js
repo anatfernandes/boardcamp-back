@@ -39,4 +39,27 @@ async function getCustomers(req, res) {
 	res.status(STATUS_CODE.OK).send(customers.rows);
 }
 
-export { createCustomer, getCustomers };
+async function getCustomer(req, res) {
+	const { id } = req.params;
+
+    if (isNaN(id)) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
+
+	let customer;
+
+	try {
+		customer = (
+			await connection.query("SELECT * FROM customers WHERE id = $1", [id])
+		).rows[0];
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
+
+	if (!customer) return res.sendStatus(STATUS_CODE.NOT_FOUND);
+
+	customer.birthday = new Date(customer.birthday).toISOString().slice(0, 10);
+
+	res.status(STATUS_CODE.OK).send(customer);
+}
+
+export { createCustomer, getCustomers, getCustomer };
