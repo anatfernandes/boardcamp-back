@@ -42,7 +42,7 @@ async function getCustomers(req, res) {
 async function getCustomer(req, res) {
 	const { id } = req.params;
 
-    if (isNaN(id)) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
+	if (isNaN(id)) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
 
 	let customer;
 
@@ -62,4 +62,21 @@ async function getCustomer(req, res) {
 	res.status(STATUS_CODE.OK).send(customer);
 }
 
-export { createCustomer, getCustomers, getCustomer };
+async function updateCustomer(req, res) {
+	const { name, cpf, phone, birthday } = req.body;
+	const { id } = req.params;
+
+	try {
+		await connection.query(
+			"UPDATE customers SET name=$1, cpf=$2, phone=$3, birthday=$4 WHERE id = $5;",
+			[name, cpf, phone, birthday, id]
+		);
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
+
+	res.sendStatus(STATUS_CODE.OK);
+}
+
+export { createCustomer, getCustomers, getCustomer, updateCustomer };
