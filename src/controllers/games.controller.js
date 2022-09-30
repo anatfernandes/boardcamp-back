@@ -19,18 +19,27 @@ async function createGame(req, res) {
 }
 
 async function getGames(req, res) {
+	const { name } = req.query;
+
 	let games;
 
+	const searchBase = `SELECT games.*, categories.name AS categoryName
+		FROM games JOIN categories
+		ON games."categoryId" = categories.id`;
+
 	try {
-		games = (await connection
-			.query(`SELECT games.*, categories.name AS categoryName FROM games JOIN categories
-				ON games."categoryId" = categories.id;`)).rows;
+		games = name
+			? await connection.query(
+					`${searchBase} WHERE games.name ILIKE $1 ORDER BY games.id;`,
+					[`${name}%`]
+			  )
+			: await connection.query(`${searchBase};`);
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
 	}
 
-	res.status(STATUS_CODE.OK).send(games);
+	res.status(STATUS_CODE.OK).send(games.rows);
 }
 
 export { createGame, getGames };
