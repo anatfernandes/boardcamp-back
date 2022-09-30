@@ -28,4 +28,17 @@ async function createRental(req, res) {
 	res.sendStatus(STATUS_CODE.OK);
 }
 
-export { createRental };
+async function deleteRental(req, res) {
+	const { idRental } = res.locals;
+
+	try {
+		await connection.query("DELETE FROM rentals WHERE id = $1;", [idRental]);
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
+
+	res.sendStatus(STATUS_CODE.OK);
+}
+
+export { createRental, deleteRental };

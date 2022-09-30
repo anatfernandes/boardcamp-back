@@ -1,9 +1,16 @@
 import express from "express";
-import { createRental } from "../controllers/rentals.controller.js";
-import { validateRental } from "../middlewares/schemas.middleware.js";
+import {
+	createRental,
+	deleteRental,
+} from "../controllers/rentals.controller.js";
+import {
+	validateCreateRental,
+	validateDeleteRental,
+} from "../middlewares/schemas.middleware.js";
 
 const router = express.Router();
 
-router.post("/rentals", validateRental, createRental);
+router.post("/rentals", validateCreateRental, createRental);
+router.delete("/rentals/:id", validateDeleteRental, deleteRental);
 
 export default router;
