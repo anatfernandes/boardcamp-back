@@ -29,22 +29,42 @@ async function createRental(req, res) {
 }
 
 async function getRentals(req, res) {
+	const { customerId, gameId } = req.query;
+
 	let rentals;
+	let query;
+
+	const searchBase = `
+		SELECT
+			rentals.*,
+			JSON_BUILD_OBJECT('id', customers.id, 'name', customers.name) AS customer,
+			JSON_BUILD_OBJECT('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) AS game
+		FROM rentals
+		JOIN customers
+			ON customers.id = rentals."customerId"
+		JOIN games
+			ON games.id = rentals."gameId"
+		JOIN categories
+			ON games."categoryId" = categories.id
+	`;
+
+	if (customerId && gameId) {
+		query = `${searchBase}
+				WHERE customers.id = $1
+				AND games.id = $2;`;
+	} else if (customerId) {
+		query = `${searchBase} WHERE customers.id = $1;`;
+	} else if (gameId) {
+		query = `${searchBase} WHERE games.id = $1;`;
+	}
 
 	try {
-		rentals = await connection.query(
-			`SELECT
-				rentals.*,
-				JSON_BUILD_OBJECT('id', customers.id, 'name', customers.name) AS customer,
-				JSON_BUILD_OBJECT('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) AS game
-			FROM rentals
-				JOIN customers
-					ON customers.id = rentals."customerId"
-				JOIN games
-					ON games.id = rentals."gameId"
-				JOIN categories
-					ON games."categoryId" = categories.id;`
-		);
+		rentals =
+			customerId && gameId
+				? await connection.query(query, [customerId, gameId])
+				: query
+				? await connection.query(query, [customerId || gameId])
+				: await connection.query(searchBase);
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
