@@ -1,9 +1,9 @@
 import express from "express";
+import { validateNameCategorie } from "../middlewares/categorie.middleware.js";
 import {
 	createCategorie,
 	getCategorie,
 } from "../controllers/categories.controller.js";
-import { validateNameCategorie } from "../middlewares/categorie.middleware.js";
 
 const router = express.Router();
 
