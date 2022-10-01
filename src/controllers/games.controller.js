@@ -6,8 +6,10 @@ async function createGame(req, res) {
 
 	try {
 		await connection.query(
-			`INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay")
-				VALUES ($1, $2, $3, $4, $5);`,
+			`INSERT INTO games
+				(name, image, "stockTotal", "categoryId", "pricePerDay")
+				VALUES ($1, $2, $3, $4, $5);
+			`,
 			[name, image, stockTotal, categoryId, pricePerDay]
 		);
 	} catch (error) {
@@ -23,14 +25,21 @@ async function getGames(req, res) {
 
 	let games;
 
-	const searchBase = `SELECT games.*, categories.name AS categoryName
-		FROM games JOIN categories
-		ON games."categoryId" = categories.id`;
+	const searchBase = `
+		SELECT
+			games.*, categories.name AS "categoryName"
+		FROM games
+		JOIN categories
+		ON games."categoryId" = categories.id
+	`;
 
 	try {
 		games = name
 			? await connection.query(
-					`${searchBase} WHERE games.name ILIKE $1 ORDER BY games.id;`,
+					`${searchBase}
+						WHERE games.name
+						ILIKE $1
+						ORDER BY games.id;`,
 					[`${name}%`]
 			  )
 			: await connection.query(`${searchBase};`);
