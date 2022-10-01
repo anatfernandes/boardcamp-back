@@ -10,7 +10,11 @@ const customerSchema = joi.object({
 		.string()
 		.regex(/^[0-9]{11}$/)
 		.required(),
-	birthday: joi.date(),
+	birthday: joi
+		.string()
+		.regex(/^(1[0-9]{3}|2[0-9]{3})[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/)
+		.message("Date format: YYYY-MM-DD")
+		.required(),
 });
 
 export { customerSchema };

@@ -1,5 +1,5 @@
 import express from "express";
-import { validateCustomerData } from "../middlewares/schemas.middleware.js";
+import { validateCustomerData } from "../middlewares/customer.middleware.js";
 import {
 	createCustomer,
 	getCustomers,
