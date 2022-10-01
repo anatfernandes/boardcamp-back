@@ -1,12 +1,9 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import categoriesRouter from "./routers/categories.router.js";
 import gamesRouter from "./routers/games.router.js";
 import customersRouter from "./routers/customers.router.js";
 import rentalsRouter from "./routers/rentals.router.js";
-
-dotenv.config();
 
 const server = express();
 
