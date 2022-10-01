@@ -3,7 +3,7 @@ import {
 	createCategorie,
 	getCategorie,
 } from "../controllers/categories.controller.js";
-import { validateNameCategorie } from "../middlewares/schemas.middleware.js";
+import { validateNameCategorie } from "../middlewares/categorie.middleware.js";
 
 const router = express.Router();
 
