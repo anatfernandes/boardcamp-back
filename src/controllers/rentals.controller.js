@@ -28,6 +28,31 @@ async function createRental(req, res) {
 	res.sendStatus(STATUS_CODE.OK);
 }
 
+async function getRentals(req, res) {
+	let rentals;
+
+	try {
+		rentals = await connection.query(
+			`SELECT
+				rentals.*,
+				JSON_BUILD_OBJECT('id', customers.id, 'name', customers.name) AS customer,
+				JSON_BUILD_OBJECT('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) AS game
+			FROM rentals
+				JOIN customers
+					ON customers.id = rentals."customerId"
+				JOIN games
+					ON games.id = rentals."gameId"
+				JOIN categories
+					ON games."categoryId" = categories.id;`
+		);
+	} catch (error) {
+		console.log(error);
+		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
+	}
+
+	res.status(STATUS_CODE.OK).send(rentals.rows);
+}
+
 async function deleteRental(req, res) {
 	const { idRental } = res.locals;
 
@@ -71,4 +96,4 @@ async function returnRental(req, res) {
 	res.sendStatus(STATUS_CODE.OK);
 }
 
-export { createRental, deleteRental, returnRental };
+export { createRental, getRentals, deleteRental, returnRental };
