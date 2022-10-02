@@ -1,15 +1,13 @@
 import express from "express";
+import { validateCreateRental } from "../middlewares/createRental.middleware.js";
+import { validateReturnRental } from "../middlewares/returnRental.middleware.js";
+import { validateDeleteRental } from "../middlewares/deleteRental.middleware.js";
 import {
 	createRental,
 	getRentals,
 	deleteRental,
 	returnRental,
 } from "../controllers/rentals.controller.js";
-import {
-	validateCreateRental,
-	validateDeleteRental,
-	validateReturnRental,
-} from "../middlewares/schemas.middleware.js";
 
 const router = express.Router();
 

@@ -7,15 +7,16 @@ async function createRental(req, res) {
 	try {
 		await connection.query(
 			`INSERT INTO rentals
-            ("customerId", "gameId", "daysRented", "originalPrice",
-            "rentDate", "returnDate", "delayFee")
-            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+				("customerId", "gameId", "daysRented", "originalPrice",
+				"rentDate", "returnDate", "delayFee")
+            VALUES
+				($1, $2, $3, $4, $5, $6, $7)`,
 			[
 				customerId,
 				gameId,
 				daysRented,
 				game.pricePerDay * daysRented,
-				new Date().toISOString().slice(0, 10),
+				new Date().toLocaleDateString("pt-br"),
 				null,
 				null,
 			]
@@ -37,8 +38,16 @@ async function getRentals(req, res) {
 	const searchBase = `
 		SELECT
 			rentals.*,
-			JSON_BUILD_OBJECT('id', customers.id, 'name', customers.name) AS customer,
-			JSON_BUILD_OBJECT('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) AS game
+			JSON_BUILD_OBJECT
+				('id', customers.id,
+				'name', customers.name)
+				AS customer,
+			JSON_BUILD_OBJECT
+				('id', games.id,
+				'name', games.name,
+				'categoryId', games."categoryId",
+				'categoryName', categories.name)
+				AS game
 		FROM rentals
 		JOIN customers
 			ON customers.id = rentals."customerId"
@@ -61,14 +70,21 @@ async function getRentals(req, res) {
 	try {
 		rentals =
 			customerId && gameId
-				? await connection.query(query, [customerId, gameId])
+				? await connection.query(`${query} ORDER BY id`, [customerId, gameId])
 				: query
-				? await connection.query(query, [customerId || gameId])
-				: await connection.query(searchBase);
+				? await connection.query(`${query} ORDER BY id`, [customerId || gameId])
+				: await connection.query(`${searchBase} ORDER BY id`);
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
 	}
+
+	rentals.rows.forEach((rentals) => {
+		rentals.rentDate = rentals.rentDate.toLocaleDateString("pt-br");
+		rentals.returnDate = rentals.returnDate
+			? rentals.returnDate.toLocaleDateString("pt-br")
+			: null;
+	});
 
 	res.status(STATUS_CODE.OK).send(rentals.rows);
 }
@@ -92,21 +108,23 @@ async function returnRental(req, res) {
 	const day_ms = 86400000;
 
 	const rentDateTimestamp = +new Date(`${rental.rentDate}`);
-	const rentedTimestamp = rentDateTimestamp + day_ms * rental.daysRented;
+	const returnDateTimestamp = rentDateTimestamp + day_ms * rental.daysRented;
 	const todayTimestamp = Date.now();
 
 	const delayTimestamp = Math.round(
-		(todayTimestamp - rentedTimestamp) / (day_ms * 1)
+		(todayTimestamp - returnDateTimestamp) / (day_ms * 1)
 	);
 
 	const delayFee = delayTimestamp > 0 ? delayTimestamp * gamePricePerDay : 0;
 
 	try {
 		await connection.query(
-			`UPDATE rentals
-            SET "returnDate"=$1, "delayFee"=$2
+			`UPDATE
+				rentals
+            SET
+				"returnDate"=$1, "delayFee"=$2
             WHERE id = $3;`,
-			[new Date(todayTimestamp).toISOString().slice(0, 10), delayFee, idRental]
+			[new Date(todayTimestamp).toLocaleDateString("pt-br"), delayFee, idRental]
 		);
 	} catch (error) {
 		console.log(error);
