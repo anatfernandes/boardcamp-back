@@ -17,10 +17,15 @@ async function createCategorie(req, res) {
 }
 
 async function getCategorie(req, res) {
+	const { offset = null, limit = null } = req.query;
+
 	let categories;
 
 	try {
-		categories = await connection.query("SELECT * FROM categories;");
+		categories = await connection.query(
+			"SELECT * FROM categories OFFSET $1 LIMIT $2;",
+			[offset, limit]
+		);
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
