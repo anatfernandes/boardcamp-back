@@ -36,7 +36,7 @@ async function getCustomers(req, res) {
 	}
 
 	customers.forEach((customer) => {
-		customer.birthday = customer.birthday.toLocaleDateString('pt-br');
+		customer.birthday = customer.birthday.toLocaleDateString('en-US');
 	});
 
 	res.status(STATUS_CODE.OK).send(customers);
@@ -60,7 +60,7 @@ async function getCustomer(req, res) {
 
 	if (!customer) return res.sendStatus(STATUS_CODE.NOT_FOUND);
 
-	customer.birthday = customer.birthday.toLocaleDateString('pt-br');
+	customer.birthday = customer.birthday.toLocaleDateString('en-US');
 
 	res.status(STATUS_CODE.OK).send(customer);
 }
