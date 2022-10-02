@@ -21,7 +21,7 @@ async function createGame(req, res) {
 }
 
 async function getGames(req, res) {
-	const { name } = req.query;
+	const { name, offset = null, limit = null } = req.query;
 
 	let games;
 
@@ -39,10 +39,17 @@ async function getGames(req, res) {
 					`${searchBase}
 						WHERE games.name
 						ILIKE $1
-						ORDER BY games.id;`,
-					[`${name}%`]
+						ORDER BY games.id
+						OFFSET $2
+						LIMIT $3;`,
+					[`${name}%`, offset, limit]
 			  )
-			: await connection.query(`${searchBase};`);
+			: await connection.query(
+					`${searchBase}
+						OFFSET $1
+						LIMIT $2;`,
+					[offset, limit]
+			  );
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
