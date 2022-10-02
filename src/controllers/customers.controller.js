@@ -6,7 +6,9 @@ async function createCustomer(req, res) {
 
 	try {
 		await connection.query(
-			"INSERT INTO customers (name, cpf, phone, birthday) VALUES ($1, $2, $3, $4);",
+			`INSERT INTO customers
+				(name, cpf, phone, birthday)
+			VALUES ($1, $2, $3, $4);`,
 			[name, cpf, phone, birthday]
 		);
 	} catch (error) {
@@ -23,20 +25,21 @@ async function getCustomers(req, res) {
 	let customers;
 
 	try {
-		customers = await connection.query(
-			"SELECT * FROM customers WHERE cpf LIKE $1",
-			[`${cpf}%`]
-		);
+		customers = (
+			await connection.query("SELECT * FROM customers WHERE cpf LIKE $1", [
+				`${cpf}%`,
+			])
+		).rows;
 	} catch (error) {
 		console.log(error);
 		return res.sendStatus(STATUS_CODE.SERVER_ERROR);
 	}
 
-	customers.rows.forEach((customer) => {
-		customer.birthday = new Date(customer.birthday).toISOString().slice(0, 10);
+	customers.forEach((customer) => {
+		customer.birthday = customer.birthday.toISOString().slice(0, 10);
 	});
 
-	res.status(STATUS_CODE.OK).send(customers.rows);
+	res.status(STATUS_CODE.OK).send(customers);
 }
 
 async function getCustomer(req, res) {
@@ -57,7 +60,7 @@ async function getCustomer(req, res) {
 
 	if (!customer) return res.sendStatus(STATUS_CODE.NOT_FOUND);
 
-	customer.birthday = new Date(customer.birthday).toISOString().slice(0, 10);
+	customer.birthday = customer.birthday.toISOString().slice(0, 10);
 
 	res.status(STATUS_CODE.OK).send(customer);
 }
@@ -67,8 +70,10 @@ async function updateCustomer(req, res) {
 	const { id } = req.params;
 
 	try {
-		await connection.query(
-			"UPDATE customers SET name=$1, cpf=$2, phone=$3, birthday=$4 WHERE id = $5;",
+		await connection.query(`
+			UPDATE customers
+			SET	name=$1, cpf=$2, phone=$3, birthday=$4
+			WHERE id = $5;`,
 			[name, cpf, phone, birthday, id]
 		);
 	} catch (error) {

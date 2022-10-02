@@ -4,6 +4,9 @@ import { customerSchema } from "../schemas/customer.schema.js";
 
 async function validateCustomerData(req, res, next) {
 	const { name, cpf, phone, birthday } = req.body;
+	const { id } = req.params;
+
+	if (id && isNaN(id)) return res.sendStatus(STATUS_CODE.UNPROCESSABLE_ENTITY);
 
 	const isValidData = customerSchema.validate(
 		{
@@ -21,12 +24,19 @@ async function validateCustomerData(req, res, next) {
 	}
 
 	try {
-		const hasName = await connection.query(
-			"SELECT cpf FROM customers WHERE cpf = $1;",
-			[`${cpf}`]
-		);
+		const hasCpf = id
+			? await connection.query(
+					`
+					SELECT cpf
+					FROM customers
+					WHERE cpf = $1 AND id <> $2;`,
+					[cpf, id]
+			  )
+			: await connection.query("SELECT cpf FROM customers WHERE cpf = $1;", [
+					cpf,
+			  ]);
 
-		if (hasName.rows.length !== 0)
+		if (hasCpf.rows.length !== 0)
 			return res
 				.status(STATUS_CODE.CONFLICT)
 				.send({ message: "Esse cliente já existe." });
