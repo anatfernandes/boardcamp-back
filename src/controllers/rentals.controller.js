@@ -16,7 +16,7 @@ async function createRental(req, res) {
 				gameId,
 				daysRented,
 				game.pricePerDay * daysRented,
-				new Date().toLocaleDateString('en-US'),
+				new Date().toLocaleDateString('pt-br'),
 				null,
 				null,
 			]
@@ -115,7 +115,7 @@ async function returnRental(req, res) {
 		(todayTimestamp - returnDateTimestamp) / (day_ms * 1)
 	);
 
-	const delayFee = delayTimestamp > 0 ? delayTimestamp * gamePricePerDay : 0;
+	const delayFee = delayTimestamp > 0 ? delayTimestamp * rental.originalPrice : 0;
 
 	try {
 		await connection.query(
@@ -124,7 +124,7 @@ async function returnRental(req, res) {
             SET
 				"returnDate"=$1, "delayFee"=$2
             WHERE id = $3;`,
-			[new Date(todayTimestamp).toLocaleDateString('en-US'), delayFee, idRental]
+			[new Date(todayTimestamp).toLocaleDateString('pt-br'), delayFee, idRental]
 		);
 	} catch (error) {
 		console.log(error);
