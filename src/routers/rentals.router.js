@@ -2,6 +2,7 @@ import express from "express";
 import { validateCreateRental } from "../middlewares/createRental.middleware.js";
 import { validateReturnRental } from "../middlewares/returnRental.middleware.js";
 import { validateDeleteRental } from "../middlewares/deleteRental.middleware.js";
+import { constructQueryGetRentals } from "../middlewares/getRentals.middleware.js";
 import {
 	createRental,
 	getRentals,
@@ -11,7 +12,7 @@ import {
 
 const router = express.Router();
 
-router.get("/rentals", getRentals);
+router.get("/rentals", constructQueryGetRentals, getRentals);
 router.post("/rentals", validateCreateRental, createRental);
 router.post("/rentals/:id/return", validateReturnRental, returnRental);
 router.delete("/rentals/:id", validateDeleteRental, deleteRental);

@@ -16,7 +16,7 @@ async function createRental(req, res) {
 				gameId,
 				daysRented,
 				game.pricePerDay * daysRented,
-				new Date().toLocaleDateString("pt-br"),
+				new Date().toISOString().slice(0, 10),
 				null,
 				null,
 			]
@@ -30,28 +30,12 @@ async function createRental(req, res) {
 }
 
 async function getRentals(req, res) {
-	let {
-		customerId,
-		gameId,
-		offset = null,
-		limit = null,
-		order,
-		desc,
-	} = req.query;
-
-	if (
-		order !== "id" &&
-		order != "rentDate" &&
-		order != "returnDate" &&
-		order != "daysRented"
-	) {
-		order = "id";
-	}
+	const { customerId, gameId } = req.query;
+	const { WHERE, ORDER, VARIABLES } = res.locals;
 
 	let rentals;
-	let query;
 
-	const searchBase = `
+	let searchBase = `
 		SELECT
 			rentals.*,
 			JSON_BUILD_OBJECT
@@ -73,43 +57,17 @@ async function getRentals(req, res) {
 			ON games."categoryId" = categories.id
 	`;
 
-	if (customerId && gameId) {
-		query = `${searchBase}
-				WHERE customers.id = $1
-				AND games.id = $2;`;
-	} else if (customerId) {
-		query = `${searchBase} WHERE customers.id = $1;`;
-	} else if (gameId) {
-		query = `${searchBase} WHERE games.id = $1;`;
-	}
-
 	try {
 		rentals =
-			customerId && gameId
-				? await connection.query(
-						`${query}
-							ORDER BY rentals."${order}"
-							${desc === "true" ? " DESC " : " ASC "}
-							OFFSET $3
-							LIMIT $4;`,
-						[customerId, gameId, offset, limit]
-				  )
-				: query
-				? await connection.query(
-						`${query}
-							ORDER BY rentals."${order}"
-							${desc === "true" ? " DESC " : " ASC "}
-							OFFSET $2
-							LIMIT $3;`,
-						[customerId || gameId, offset, limit]
-				  )
+			customerId || gameId
+				? await connection.query(`${searchBase} ${WHERE};`, VARIABLES)
 				: await connection.query(
 						`${searchBase}
-							ORDER BY rentals."${order}"
-							${desc === "true" ? " DESC " : " ASC "}
-							OFFSET $1
-							LIMIT $2;`,
-						[offset, limit]
+						${ORDER}
+						${WHERE}
+						OFFSET $1
+						LIMIT $2;`,
+						VARIABLES
 				  );
 	} catch (error) {
 		console.log(error);
@@ -117,9 +75,9 @@ async function getRentals(req, res) {
 	}
 
 	rentals.rows.forEach((rentals) => {
-		rentals.rentDate = rentals.rentDate.toLocaleDateString("en-US");
+		rentals.rentDate = rentals.rentDate.toISOString().slice(0, 10);
 		rentals.returnDate = rentals.returnDate
-			? rentals.returnDate.toLocaleDateString("en-US")
+			? rentals.returnDate.toISOString().slice(0, 10)
 			: null;
 	});
 
