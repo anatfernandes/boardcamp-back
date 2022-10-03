@@ -21,7 +21,7 @@ async function getCategorie(req, res) {
 
 	let categories;
 
-	if(order !== 'id' && order != 'name') order = true;
+	if (order !== "id" && order != "name") order = true;
 
 	try {
 		categories = await connection.query(
@@ -29,7 +29,7 @@ async function getCategorie(req, res) {
 				*
 			FROM categories
 			ORDER BY ${order}
-			${ desc ? ' DESC ' : ' ASC '}
+			${desc === "true" ? " DESC " : " ASC "}
 			OFFSET $1
 			LIMIT $2;`,
 			[offset, limit]

@@ -21,9 +21,19 @@ async function createGame(req, res) {
 }
 
 async function getGames(req, res) {
-	const { name, offset = null, limit = null } = req.query;
+	let { name, offset = null, limit = null, order, desc } = req.query;
 
 	let games;
+
+	if (
+		order !== "id" &&
+		order != "name" &&
+		order != "stockTotal" &&
+		order != "categoryId" &&
+		order != "pricePerDay"
+	) {
+		order = "id";
+	}
 
 	const searchBase = `
 		SELECT
@@ -39,13 +49,16 @@ async function getGames(req, res) {
 					`${searchBase}
 						WHERE games.name
 						ILIKE $1
-						ORDER BY games.id
+						ORDER BY games."${order}"
+						${desc ? " DESC " : " ASC "}
 						OFFSET $2
 						LIMIT $3;`,
 					[`${name}%`, offset, limit]
 			  )
 			: await connection.query(
 					`${searchBase}
+						ORDER BY games."${order}"
+						${desc === "true" ? " DESC " : " ASC "}
 						OFFSET $1
 						LIMIT $2;`,
 					[offset, limit]
