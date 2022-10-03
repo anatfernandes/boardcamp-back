@@ -30,7 +30,23 @@ async function createRental(req, res) {
 }
 
 async function getRentals(req, res) {
-	const { customerId, gameId, offset = null, limit = null } = req.query;
+	let {
+		customerId,
+		gameId,
+		offset = null,
+		limit = null,
+		order,
+		desc,
+	} = req.query;
+
+	if (
+		order !== "id" &&
+		order != "rentDate" &&
+		order != "returnDate" &&
+		order != "daysRented"
+	) {
+		order = "id";
+	}
 
 	let rentals;
 	let query;
@@ -72,6 +88,8 @@ async function getRentals(req, res) {
 			customerId && gameId
 				? await connection.query(
 						`${query}
+							ORDER BY rentals."${order}"
+							${desc === "true" ? " DESC " : " ASC "}
 							OFFSET $3
 							LIMIT $4;`,
 						[customerId, gameId, offset, limit]
@@ -79,12 +97,16 @@ async function getRentals(req, res) {
 				: query
 				? await connection.query(
 						`${query}
+							ORDER BY rentals."${order}"
+							${desc === "true" ? " DESC " : " ASC "}
 							OFFSET $2
 							LIMIT $3;`,
 						[customerId || gameId, offset, limit]
 				  )
 				: await connection.query(
 						`${searchBase}
+							ORDER BY rentals."${order}"
+							${desc === "true" ? " DESC " : " ASC "}
 							OFFSET $1
 							LIMIT $2;`,
 						[offset, limit]
