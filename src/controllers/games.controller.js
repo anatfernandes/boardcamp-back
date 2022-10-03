@@ -50,7 +50,7 @@ async function getGames(req, res) {
 						WHERE games.name
 						ILIKE $1
 						ORDER BY games."${order}"
-						${desc ? " DESC " : " ASC "}
+						${desc === "true" ? " DESC " : " ASC "}
 						OFFSET $2
 						LIMIT $3;`,
 					[`${name}%`, offset, limit]

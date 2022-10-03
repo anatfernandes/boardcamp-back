@@ -20,7 +20,17 @@ async function createCustomer(req, res) {
 }
 
 async function getCustomers(req, res) {
-	const { cpf = "", offset = null, limit = null } = req.query;
+	let { cpf = "", offset = null, limit = null, order, desc } = req.query;
+
+	if (
+		order !== "id" &&
+		order != "name" &&
+		order != "phone" &&
+		order != "cpf" &&
+		order != "birthday"
+	) {
+		order = "id";
+	}
 
 	let customers;
 
@@ -31,6 +41,8 @@ async function getCustomers(req, res) {
 					*
 				FROM customers
 				WHERE cpf LIKE $1
+				ORDER BY "${order}"
+				${desc === "true" ? " DESC " : " ASC "}
 				OFFSET $2
 				LIMIT $3`,
 				[`${cpf}%`, offset, limit]
