@@ -17,13 +17,21 @@ async function createCategorie(req, res) {
 }
 
 async function getCategorie(req, res) {
-	const { offset = null, limit = null } = req.query;
+	let { offset = null, limit = null, order, desc } = req.query;
 
 	let categories;
 
+	if(order !== 'id' && order != 'name') order = true;
+
 	try {
 		categories = await connection.query(
-			"SELECT * FROM categories OFFSET $1 LIMIT $2;",
+			`SELECT
+				*
+			FROM categories
+			ORDER BY ${order}
+			${ desc ? ' DESC ' : ' ASC '}
+			OFFSET $1
+			LIMIT $2;`,
 			[offset, limit]
 		);
 	} catch (error) {
