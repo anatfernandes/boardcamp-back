@@ -1,5 +1,7 @@
 # :game_die: Boardcamp Back
 
+![Badge Finalizado](https://img.shields.io/static/v1?label=STATUS&message=FINALIZADO&color=success&style=for-the-badge)
+
 # Índice
 
 - [Sobre](#Sobre)
@@ -290,7 +292,7 @@ API para a gestão de uma locadora de jogos de tabuleiro.
 
 1. Clone esse repositório:
 >```bash
-> git clone https://github.com/AnaLTFernandes/boardcamp-back.git
+> git clone https://github.com/anatfernandes/boardcamp-back.git
 >```
 
 2. Instale as dependências:
@@ -302,7 +304,7 @@ API para a gestão de uma locadora de jogos de tabuleiro.
 
 4. Rode o comando na raiz do projeto para criar as tabelas:
 >```bash
->#troque nome_do_banco pelo nome do banco de dados criado no passo anterior
+># troque nome_do_banco pelo nome do banco de dados criado no passo anterior
 >$ sudo su -c "psql -d nome_do_banco -f dump.sql" postgres
 >```
 
